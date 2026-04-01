@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML -> MP4/MP3 다운로더</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg0: #0b1020;
+        --bg1: #0f172a;
+        --card: rgba(255, 255, 255, 0.86);
+        --card2: rgba(255, 255, 255, 0.72);
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: rgba(15, 23, 42, 0.12);
+        --shadow: 0 18px 45px rgba(2, 6, 23, 0.18);
+        --shadow2: 0 8px 24px rgba(2, 6, 23, 0.12);
+        --primary: #2563eb;
+        --primary2: #06b6d4;
+        --danger: #dc2626;
+        --success: #059669;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        color: var(--text);
+        background: radial-gradient(1200px 600px at 20% 0%, rgba(37, 99, 235, 0.25), transparent 60%),
+          radial-gradient(1000px 700px at 90% 10%, rgba(6, 182, 212, 0.22), transparent 55%),
+          linear-gradient(180deg, #f8fafc, #eef2ff);
+      }
+
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 26px 18px 40px;
+      }
+
+      .hero {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--primary2));
+        box-shadow: var(--shadow2);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+      }
+
+      .cardHeader {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .cardTitle {
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input[type="file"],
+      input[type="text"],
+      select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.9);
+        outline: none;
+      }
+
+      input[type="text"]:focus,
+      select:focus {
+        border-color: rgba(37, 99, 235, 0.45);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      }
+
+      .urls {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        max-height: 260px;
+        overflow: auto;
+        background: rgba(255, 255, 255, 0.65);
+      }
+
+      .url-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px 10px;
+        border-radius: 10px;
+        align-items: flex-start;
+      }
+
+      .url-item:hover {
+        background: rgba(37, 99, 235, 0.06);
+      }
+
+      .url-item input {
+        margin-top: 2px;
+      }
+
+      .url-text {
+        word-break: break-all;
+        font-size: 13px;
+        color: #0f172a;
+      }
+
+      .url-tag {
+        display: inline-flex;
+        align-items: center;
+        height: 18px;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        border: 1px solid var(--border);
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.7);
+        margin-left: 8px;
+      }
+
+      .btnRow {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .btnPrimary {
+        border: none;
+        background: linear-gradient(135deg, var(--primary), var(--primary2));
+        color: #fff;
+        border-radius: 12px;
+        padding: 11px 14px;
+        cursor: pointer;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+      }
+
+      .btnPrimary:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .btnGhost {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.7);
+        color: #0f172a;
+        border-radius: 12px;
+        padding: 11px 14px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .status {
+        margin-top: 12px;
+        min-height: 22px;
+        font-size: 13px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--card2);
+      }
+
+      .err {
+        color: var(--danger);
+        border-color: rgba(220, 38, 38, 0.25);
+        background: rgba(220, 38, 38, 0.06);
+      }
+
+      .ok {
+        color: var(--success);
+        border-color: rgba(5, 150, 105, 0.25);
+        background: rgba(5, 150, 105, 0.06);
+      }
+
+      .mutedStatus {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="hero">
+        <div class="title">
+          <div class="badge" aria-hidden="true"></div>
+          <div>
+            <h1>HTML → MP4 / MP3 다운로더</h1>
+            <p class="subtitle">HTML 안의 미디어 URL을 자동 추출하고, 원하는 형식으로 변환해 내려받습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">1) HTML 업로드</div>
+            <div class="hint">업로드하면 바로 URL을 찾습니다</div>
+          </div>
+          <input id="htmlFile" type="file" accept=".html,.htm,text/html" />
+
+          <div class="field">
+            <div class="cardHeader" style="margin: 0">
+              <div class="cardTitle">2) 찾은 미디어 URL</div>
+              <div class="hint">`.m3u8` 우선 표시</div>
+            </div>
+            <div id="urls" class="urls"></div>
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="cardHeader">
+            <div class="cardTitle">3) 다운로드 옵션</div>
+            <div class="hint">필요할 때만 수정</div>
+          </div>
+
+          <div class="field">
+            <label for="format">출력 형식</label>
+            <select id="format">
+              <option value="mp4">mp4 (영상)</option>
+              <option value="mp3">mp3 (음성)</option>
+            </select>
+          </div>
+
+          <div class="btnRow">
+            <button id="downloadBtn" class="btnPrimary" disabled>다운로드</button>
+            <button id="clearBtn" class="btnGhost" type="button">초기화</button>
+          </div>
+
+          <div id="status" class="status mutedStatus">HTML 파일을 업로드해주세요.</div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const htmlFileEl = document.getElementById("htmlFile");
+      const urlsEl = document.getElementById("urls");
+      const formatEl = document.getElementById("format");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const statusEl = document.getElementById("status");
+
+      let selectedUrl = null;
+
+      function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        statusEl.className = "status " + (isError ? "err" : "ok");
+      }
+
+      function renderUrls(urls) {
+        urlsEl.innerHTML = "";
+        const m3u8Urls = (urls || []).filter((u) => /\.m3u8(\?.*)?$/i.test(u));
+        if (!m3u8Urls.length) {
+          urlsEl.textContent = "추출된 URL이 없습니다.";
+          downloadBtn.disabled = true;
+          selectedUrl = null;
+          return;
+        }
+
+        selectedUrl = m3u8Urls[0];
+
+        const first = document.createElement("div");
+        first.className = "url-item";
+        first.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:6px; width:100%">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+              <div style="font-weight:700">선택됨 (0번)</div>
+              <span class="url-tag">HLS .m3u8</span>
+            </div>
+            <div class="url-text">${selectedUrl}</div>
+          </div>
+        `;
+        urlsEl.appendChild(first);
+
+        if (m3u8Urls.length > 1) {
+          const restCount = m3u8Urls.length - 1;
+          const details = document.createElement("details");
+          details.style.marginTop = "12px";
+          const summary = document.createElement("summary");
+          summary.style.cursor = "pointer";
+          summary.textContent = `추가로 ${restCount}개가 더 있습니다(보기만)`;
+          details.appendChild(summary);
+
+          const list = document.createElement("div");
+          list.style.marginTop = "10px";
+          m3u8Urls.slice(1, 6).forEach((u) => {
+            const item = document.createElement("div");
+            item.className = "url-item";
+            item.style.padding = "10px 12px";
+            item.innerHTML = `<div class="url-text">${u}</div>`;
+            list.appendChild(item);
+          });
+          if (m3u8Urls.length > 6) {
+            const more = document.createElement("div");
+            more.style.color = "#64748b";
+            more.style.fontSize = "12px";
+            more.style.marginTop = "6px";
+            more.textContent = `... 외 ${m3u8Urls.length - 6}개`;
+            list.appendChild(more);
+          }
+          details.appendChild(list);
+          urlsEl.appendChild(details);
+        }
+
+        downloadBtn.disabled = false;
+      }
+
+      async function parseHtml() {
+        try {
+          setStatus("HTML 파싱 중...");
+          const file = htmlFileEl.files[0];
+          if (!file) {
+            setStatus("HTML 파일을 먼저 선택하세요.", true);
+            return;
+          }
+
+          renderUrls([]);
+          downloadBtn.disabled = true;
+
+          const formData = new FormData();
+          formData.append("htmlFile", file);
+
+          const response = await fetch("/api/parse-html", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "파싱 실패");
+          }
+
+          renderUrls(data.urls);
+          setStatus(`URL ${data.urls.length}개를 찾았습니다.`);
+        } catch (err) {
+          renderUrls([]);
+          setStatus(err.message, true);
+        }
+      }
+
+      function clearAll() {
+        htmlFileEl.value = "";
+        selectedUrl = null;
+        renderUrls([]);
+        setStatus("HTML 파일을 업로드해주세요.", false);
+        statusEl.classList.add("mutedStatus");
+      }
+
+      async function downloadSelected() {
+        if (!selectedUrl) {
+          setStatus("다운로드할 URL이 없습니다. 먼저 HTML을 업로드해주세요.", true);
+          return;
+        }
+
+        try {
+          setStatus("변환/다운로드 중... 잠시만 기다려주세요.");
+          statusEl.classList.remove("mutedStatus");
+          downloadBtn.disabled = true;
+          const format = formatEl.value;
+
+          const response = await fetch("/api/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mediaUrl: selectedUrl,
+              format,
+            }),
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || "다운로드 실패");
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `download.${format}`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+
+          setStatus("다운로드가 완료되었습니다.");
+        } catch (err) {
+          setStatus(err.message, true);
+        } finally {
+          downloadBtn.disabled = false;
+        }
+      }
+
+      htmlFileEl.addEventListener("change", parseHtml);
+      downloadBtn.addEventListener("click", downloadSelected);
+      clearBtn.addEventListener("click", clearAll);
+    </script>
+  </body>
+</html>
